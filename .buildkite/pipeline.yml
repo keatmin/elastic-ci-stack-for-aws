@@ -87,7 +87,7 @@ steps:
 
   - id: "test-linux-amd64"
     name: ":cloudformation: :linux: AMD64 Test"
-    command: "goss validate --retry-timeout 30s --format documentation"
+    command: "goss validate --format documentation"
     timeout_in_minutes: 5
     agents:
       stack: "buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}"
@@ -126,12 +126,12 @@ steps:
 
   - id: "test-linux-arm64"
     name: ":cloudformation: :linux: ARM64 Test"
-    command: "goss validate --retry-timeout 30s --format documentation"
+    command: "goss validate --format documentation"
     timeout_in_minutes: 5
     agents:
       stack: "buildkite-aws-stack-test-linux-arm64-${BUILDKITE_BUILD_NUMBER}"
       queue: "testqueue-linux-arm64-${BUILDKITE_BUILD_NUMBER}"
-    depends_on:
+    depends_on: 
       - "launch-linux-arm64"
 
   - id: "delete-linux-arm64"
