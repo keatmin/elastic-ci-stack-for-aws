@@ -121,7 +121,7 @@ command:
     exit-status: 0
 
   # Checks that permissions
-  #'sh -c "docker run --rm -v \"$PWD:/pwd\" alpine:latest touch /pwd/test && stat -c %U:%G test"':
-  #  exit-status: 0
-  #  stdout:
-  #  - buildkite-agent:docker
+  'sh -c "docker run --rm -v \"$PWD:/pwd\" alpine:latest touch /pwd/test && stat -c %U:%G test"':
+    exit-status: 0
+    stdout:
+    - buildkite-agent:docker
