@@ -2,6 +2,7 @@
 set -eu -o pipefail
 
 AGENT_VERSION=3.40.0
+AGENT_REF=latest
 
 MACHINE="$(uname -m)"
 
@@ -13,7 +14,7 @@ esac
 
 echo "Installing dependencies..."
 sudo yum update -y -q
-sudo yum install -y -q git-core
+sudo yum install -y -q git-core golang
 
 echo "Creating buildkite-agent user and group..."
 sudo useradd --base-dir /var/lib --uid 2000 buildkite-agent
@@ -23,6 +24,14 @@ echo "Downloading buildkite-agent v${AGENT_VERSION} stable..."
 sudo curl -Lsf -o /usr/bin/buildkite-agent-stable \
   "https://download.buildkite.com/agent/stable/${AGENT_VERSION}/buildkite-agent-linux-${ARCH}"
 sudo chmod +x /usr/bin/buildkite-agent-stable
+buildkite-agent-stable --version
+
+export GOPATH="$HOME/go"
+mkdir -p "$GOPATH"
+CGO_ENABLED=0 go install "github.com/buildkite/agent/v3@$AGENT_REF"
+sudo mv "$GOPATH/bin/agent" /usr/bin/buildkite-agent-stable
+sudo chmod 755 /usr/bin/buildkite-agent-stable
+sudo rm -rf "$GOPATH"
 buildkite-agent-stable --version
 
 echo "Downloading buildkite-agent beta..."
