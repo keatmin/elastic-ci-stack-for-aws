@@ -2,7 +2,7 @@
 set -eu -o pipefail
 
 AGENT_VERSION=3.40.0
-AGENT_REF=latest
+AGENT_REF=main
 
 MACHINE="$(uname -m)"
 
