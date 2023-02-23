@@ -6,6 +6,8 @@ DOCKER_RELEASE="stable"
 DOCKER_COMPOSE_VERSION=1.29.2
 DOCKER_COMPOSE_V2_VERSION=2.16.0
 DOCKER_BUILDX_VERSION="0.10.3"
+#QEMU_VERSION=6.2.0
+
 MACHINE=$(uname -m)
 
 # This performs a manual install of Docker.
@@ -31,13 +33,13 @@ echo "Installing systemd services"
 sudo curl -Lfs -o /etc/systemd/system/docker.service "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.service"
 sudo curl -Lfs -o /etc/systemd/system/docker.socket "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.socket"
 sudo systemctl daemon-reload
-sudo systemctl enable docker.service
+sudo systemctl enable --now docker.service
 
 if [ "${MACHINE}" == "x86_64" ]; then
-	echo "Downloading docker-compose..."
-	sudo curl -Lsf -o /usr/bin/docker-compose https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-x86_64
-	sudo chmod +x /usr/bin/docker-compose
-	docker-compose --version
+  echo "Downloading docker-compose..."
+  sudo curl -Lsf -o /usr/bin/docker-compose https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-x86_64
+  sudo chmod +x /usr/bin/docker-compose
+  docker-compose --version
 elif [[ "${MACHINE}" == "aarch64" ]]; then
   sudo yum install -y gcc-c++ libffi-devel openssl11 openssl11-devel python3-devel
 
@@ -51,7 +53,7 @@ elif [[ "${MACHINE}" == "aarch64" ]]; then
   echo 'cryptography<3.4' >"$CONSTRAINT_FILE"
   sudo pip3 install --constraint "$CONSTRAINT_FILE" "docker-compose==${DOCKER_COMPOSE_VERSION}"
 
-	docker-compose version
+  docker-compose version
 else
   echo "No docker compose option configured for arch ${MACHINE}"
   exit 1
@@ -90,9 +92,11 @@ sudo curl --location --fail --silent --output "${DOCKER_CLI_DIR}/docker-compose"
 sudo chmod +x "${DOCKER_CLI_DIR}/docker-compose"
 docker compose version
 
+QEMU_VERSION=6.2.0
 echo "Installing qemu..."
 sudo yum install -y qemu qemu-user-static
 
-curl --location --fail --silent --output /tmp/qemu-binfmt-conf.sh https://raw.githubusercontent.com/qemu/qemu/v6.1.0/scripts/qemu-binfmt-conf.sh
-chmod +x /tmp/qemu-binfmt-conf.sh
-sudo /tmp/qemu-binfmt-conf.sh --qemu-suffix "-static" --qemu-path /usr/bin
+sudo docker run --privileged --userns=host --rm "tonistiigi/binfmt:qemu-v$QEMU_VERSION" --uninstall qemu-*
+sudo docker run --privileged --userns=host --rm "tonistiigi/binfmt:qemu-v$QEMU_VERSION" --install all
+
+sudo systemctl stop docker.service
