@@ -78,6 +78,16 @@
     },
     {
       "type": "shell",
+      "inline": "sudo systemctl reboot",
+      "expect_disconnect": true,
+      "pause_after": "10s"
+    },
+    {
+      "type": "shell",
+      "script": "scripts/install-qemu.sh"
+    },
+    {
+      "type": "shell",
       "inline": [
         "rm /home/ec2-user/.ssh/authorized_keys"
       ]

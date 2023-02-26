@@ -32,7 +32,7 @@ echo "Installing systemd services"
 sudo curl -Lfs -o /etc/systemd/system/docker.service "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.service"
 sudo curl -Lfs -o /etc/systemd/system/docker.socket "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.socket"
 sudo systemctl daemon-reload
-sudo systemctl enable --now docker.service
+sudo systemctl enable docker.service
 
 if [ "${MACHINE}" == "x86_64" ]; then
   echo "Downloading docker-compose..."
@@ -91,11 +91,9 @@ sudo curl --location --fail --silent --output "${DOCKER_CLI_DIR}/docker-compose"
 sudo chmod +x "${DOCKER_CLI_DIR}/docker-compose"
 docker compose version
 
-QEMU_VERSION=6.2.0
 echo "Installing qemu..."
 sudo yum install -y qemu qemu-user-static
 
-sudo docker run --privileged --userns=host --rm "tonistiigi/binfmt:qemu-v$QEMU_VERSION" --uninstall qemu-*
-sudo docker run --privileged --userns=host --rm "tonistiigi/binfmt:qemu-v$QEMU_VERSION" --install all
-
-sudo systemctl stop docker.service
+curl --location --fail --silent --output /tmp/qemu-binfmt-conf.sh https://raw.githubusercontent.com/qemu/qemu/v6.1.0/scripts/qemu-binfmt-conf.sh
+chmod +x /tmp/qemu-binfmt-conf.sh
+sudo /tmp/qemu-binfmt-conf.sh --qemu-suffix "-static" --qemu-path /usr/bin
