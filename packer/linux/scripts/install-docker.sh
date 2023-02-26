@@ -6,7 +6,6 @@ DOCKER_RELEASE="stable"
 DOCKER_COMPOSE_VERSION=1.29.2
 DOCKER_COMPOSE_V2_VERSION=2.16.0
 DOCKER_BUILDX_VERSION="0.10.3"
-#QEMU_VERSION=6.2.0
 
 MACHINE=$(uname -m)
 
@@ -83,11 +82,11 @@ case "${MACHINE}" in
     ;;
 esac
 
-
 sudo curl --location --fail --silent --output "${DOCKER_CLI_DIR}/docker-buildx" "https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.linux-${BUILDX_ARCH}"
 sudo chmod +x "${DOCKER_CLI_DIR}/docker-buildx"
 docker buildx version
 
+echo "Installing docker compose v2..."
 sudo curl --location --fail --silent --output "${DOCKER_CLI_DIR}/docker-compose" "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_V2_VERSION}/docker-compose-linux-${DOCKER_COMPOSE_V2_ARCH}"
 sudo chmod +x "${DOCKER_CLI_DIR}/docker-compose"
 docker compose version
