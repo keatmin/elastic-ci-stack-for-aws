@@ -78,9 +78,11 @@
     },
     {
       "type": "shell",
-      "inline": "sudo systemctl reboot",
+      "inline": [
+        "sudo systemctl reboot"
+      ],
       "expect_disconnect": true,
-      "pause_after": "10s"
+      "pause_after": "30s"
     },
     {
       "type": "shell",
