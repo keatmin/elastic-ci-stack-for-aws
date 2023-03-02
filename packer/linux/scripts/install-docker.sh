@@ -90,10 +90,3 @@ echo "Installing docker compose v2..."
 sudo curl --location --fail --silent --output "${DOCKER_CLI_DIR}/docker-compose" "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_V2_VERSION}/docker-compose-linux-${DOCKER_COMPOSE_V2_ARCH}"
 sudo chmod +x "${DOCKER_CLI_DIR}/docker-compose"
 docker compose version
-
-echo "Installing qemu..."
-sudo yum install -y qemu qemu-user-static
-
-curl --location --fail --silent --output /tmp/qemu-binfmt-conf.sh https://raw.githubusercontent.com/qemu/qemu/v6.1.0/scripts/qemu-binfmt-conf.sh
-chmod +x /tmp/qemu-binfmt-conf.sh
-sudo /tmp/qemu-binfmt-conf.sh --qemu-suffix "-static" --qemu-path /usr/bin
