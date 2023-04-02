@@ -97,6 +97,8 @@ Metadata:
         - ScaleInIdlePeriod
         - ScaleOutForWaitingJobs
         - InstanceCreationTimeout
+        - InstanceBuffer
+        - MaxDescribeScalingActivitiesPages
 
       - Label:
           default: Cost Allocation Configuration
@@ -176,12 +178,12 @@ Parameters:
   BuildkiteAgentScalerServerlessARN:
     Description: ARN of the Serverless Application Repository that hosts the version of buildkite-agent-scaler to run. This needs to be public or shared with your AWS account. See https://aws.amazon.com/serverless/serverlessrepo/.
     Type: String
-    Default: arn:aws:serverlessrepo:us-east-1:172840064832:applications/buildkite-agent-scaler
+    Default: arn:aws:serverlessrepo:us-east-1:172840064832:applications/buildkite-agent-scaler-edge
 
   BuildkiteAgentScalerVersion:
     Description: Version of the buildkite-agent-scaler to use
     Type: String
-    Default: "1.3.2"
+    Default: 1.3.2-34-gc5295e8
 
   BuildkiteAgentTracingBackend:
     Description: The tracing backend to use for CI tracing. See https://buildkite.com/docs/agent/v3/tracing
@@ -331,6 +333,16 @@ Parameters:
     Description: Timeout period for Autoscaling Group Creation Policy
     Type: String
     Default: ""
+
+  MaxDescribeScalingActivitiesPages:
+    Description: Maximum number of pages to inspect for the autoscaling:DescribeScalingActivities API method. A negative number will disalbe the limit.
+    Type: Number
+    Default: -1
+
+  InstanceBuffer:
+    Description: How many free instances to maintain
+    Type: Number
+    Default: 0
 
   RootVolumeSize:
     Description: Size of each instance's root EBS volume (in GB)
@@ -1345,3 +1357,5 @@ Resources:
         AgentAutoScaleGroup: !Ref AgentAutoScaleGroup
         ScaleOutFactor: !Ref ScaleOutFactor
         ScaleOutForWaitingJobs: !Ref ScaleOutForWaitingJobs
+        InstanceBuffer: !Ref InstanceBuffer
+        MaxDescribeScalingActivitiesPages : !Ref MaxDescribeScalingActivitiesPages
