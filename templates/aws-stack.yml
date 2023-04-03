@@ -337,7 +337,7 @@ Parameters:
   MaxDescribeScalingActivitiesPages:
     Description: Maximum number of pages to inspect for the autoscaling:DescribeScalingActivities API method. A negative number will disalbe the limit.
     Type: Number
-    Default: -1
+    Default: 1
 
   InstanceBuffer:
     Description: How many free instances to maintain
