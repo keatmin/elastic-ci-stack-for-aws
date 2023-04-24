@@ -206,7 +206,8 @@ Resources:
                 "s3:PutEncryptionConfiguration",
                 "s3:PutBucketPolicy",
                 "s3:DeleteBucketPolicy",
-                "s3:PutBucketPublicAccessBlock"
+                "s3:PutBucketPublicAccessBlock",
+                "s3:PutBucketOwnershipControls"
               ],
               "Resource": "arn:aws:s3:::*"
             },
