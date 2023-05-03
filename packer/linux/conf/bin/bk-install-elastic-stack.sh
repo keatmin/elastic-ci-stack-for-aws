@@ -61,7 +61,6 @@ cat <<- "EOF" > /var/lib/buildkite-agent/cfn-env
 	        echo "^^^ +++"
 	        echo "⚠️ ${target} already set, NOT overriding! (current value \"${!target}\" set by Buildkite step env configuration, or inherited from the buildkite-agent process environment)"
 	    else
-	        echo "export ${target}=\"${value}\""
 	        declare -gx "${target}=${value}"
 	    fi
 	}
@@ -70,7 +69,6 @@ cat <<- "EOF" > /var/lib/buildkite-agent/cfn-env
 	    local target=$1
 	    local value=$2
 
-	    echo "export ${target}=\"${value}\""
 	    declare -gx "${target}=${value}"
 	}
 EOF
