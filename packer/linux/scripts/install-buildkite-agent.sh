@@ -33,6 +33,7 @@ buildkite-agent-beta --version
 sudo curl -sSL https://github.com/jdxcode/rtx/releases/download/v1.30.4/rtx-v1.30.4-linux-x64 | sudo tee /usr/bin/rtx
 sudo chmod +x /usr/bin/rtx
 
+# shellcheck source=/dev/null
 source <(rtx activate)
 rtx install go@latest
 rtx global go@latest
