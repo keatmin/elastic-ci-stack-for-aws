@@ -38,7 +38,7 @@ source <(rtx activate)
 rtx install golang@latest
 rtx x golang@latest -- go install github.com/buildkite/agent/v3@02fccbf1f44655e1cc01594fece10153be3ce9c3
 # shellcheck disable=SC2016
-rtx x golang@latest -c 'mv "$GOPATH/bin/agent" /usr/bin/buildkite-agent-stable'
+rtx x golang@latest -c 'sudo mv "$GOPATH/bin/agent" /usr/bin/buildkite-agent-stable'
 
 echo "Adding scripts..."
 sudo cp /tmp/conf/buildkite-agent/scripts/* /usr/bin
