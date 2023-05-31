@@ -36,9 +36,8 @@ sudo chmod +x /usr/bin/rtx
 # shellcheck source=/dev/null
 source <(rtx activate)
 rtx install go@latest
-rtx global go@latest
 
-go install github.com/buildkite/agent/v3@02fccbf1f44655e1cc01594fece10153be3ce9c3
+rtx x go@latest -- go install github.com/buildkite/agent/v3@02fccbf1f44655e1cc01594fece10153be3ce9c3
 mv "$GOPATH/bin/agent" /usr/bin/buildkite-agent-stable
 
 echo "Adding scripts..."
