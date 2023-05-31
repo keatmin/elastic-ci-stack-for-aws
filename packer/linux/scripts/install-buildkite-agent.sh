@@ -30,6 +30,16 @@ sudo curl -Lsf -o /usr/bin/buildkite-agent-beta \
 sudo chmod +x /usr/bin/buildkite-agent-beta
 buildkite-agent-beta --version
 
+sudo curl -sSL https://github.com/jdxcode/rtx/releases/download/v1.30.4/rtx-v1.30.4-linux-x64 > /usr/bin/rtx
+sudo chmod +x /usr/bin/rtx
+
+source <(rtx activate)
+rtx install go@latest
+rtx global go@latest
+
+go install github.com/buildkite/agent/v3@02fccbf1f44655e1cc01594fece10153be3ce9c3
+mv "$GOPATH/bin/agent" /usr/bin/buildkite-agent-stable
+
 echo "Adding scripts..."
 sudo cp /tmp/conf/buildkite-agent/scripts/* /usr/bin
 
