@@ -108,6 +108,10 @@ steps:
           run: db
           config: tests/docker-compose.yaml
 
+  - id: test-linux-amd64-docker-build
+    name: ":cloudformation: :linux::docker: AMD64 Test Docker Buildx"
+    timeout_in_minutes: 5
+    command: docker buildx build -f tests/Dockerfile --progress=plain -t buildkite-postgres:latest tests
     agents:
       stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
       queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
