@@ -1,0 +1,13 @@
+version: "3.6"
+
+services:
+  db:
+    build:
+      context: .
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+    entrypoint: "true"

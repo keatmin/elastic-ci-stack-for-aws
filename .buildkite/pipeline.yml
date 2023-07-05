@@ -100,6 +100,20 @@ steps:
     depends_on:
       - "launch-linux-amd64"
 
+  - id: test-linux-amd64-docker-compose
+    name: ":cloudformation: :linux::docker: AMD64 Test Docker Compose"
+    timeout_in_minutes: 5
+    plugins:
+      - docker-compose#v3.7.0:
+          run: db
+          config: tests/docker-compose.yaml
+
+    agents:
+      stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
+      queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
+    depends_on:
+      - launch-linux-amd64
+
   - id: "delete-linux-amd64"
     name: ":cloudformation: :linux: AMD64 Delete"
     command: .buildkite/steps/delete.sh linux amd64
