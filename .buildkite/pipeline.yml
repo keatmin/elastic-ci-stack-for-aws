@@ -103,6 +103,11 @@ steps:
   - id: test-linux-amd64-docker-compose
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Compose"
     timeout_in_minutes: 5
+    agents:
+      stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
+      queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
+    env:
+      BUILDKIT_PROGRESS: plain
     plugins:
       - docker-compose#v3.7.0:
           run: db
