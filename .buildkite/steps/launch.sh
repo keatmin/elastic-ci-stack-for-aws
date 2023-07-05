@@ -74,7 +74,7 @@ cat << EOF > config.json
   },
   {
     "ParameterKey": "AgentsPerInstance",
-    "ParameterValue": "3"
+    "ParameterValue": "1"
   },
   {
     "ParameterKey": "ECRAccessPolicy",
