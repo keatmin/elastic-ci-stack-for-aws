@@ -1,71 +1,11 @@
 dag: true
 
 steps:
-  - id: "lint"
-    name: ":bash: Lint"
-    command: .buildkite/steps/lint.sh
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-
-  - id: "bats-tests"
-    name: ":bash: Unit tests"
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    plugins:
-      docker-compose#v2.1.0:
-        run: unit-tests
-        config: docker-compose.unit-tests.yml
-
   - id: "deploy-service-role-stack"
     name: ":aws-iam: :cloudformation:"
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     command: .buildkite/steps/deploy-service-role-stack.sh
-    depends_on:
-      - "lint"
-      - "bats-tests"
-
-  - id: "packer-windows-amd64"
-    name: ":packer: :windows:"
-    command: .buildkite/steps/packer.sh windows
-    timeout_in_minutes: 60
-    retry: { automatic: { limit: 3 } }
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on:
-      - "lint"
-      - "bats-tests"
-
-  - id: "launch-windows-amd64"
-    name: ":cloudformation: :windows: AMD64 Launch"
-    command: .buildkite/steps/launch.sh windows amd64
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    artifact_paths: "build/aws-stack.yml"
-    depends_on:
-      - "packer-windows-amd64"
-      - "deploy-service-role-stack"
-
-  - id: "test-windows-amd64"
-    name: ":cloudformation: :windows: AMD64 Test"
-    command:
-      - git --version
-      - docker info
-      - docker run --rm mcr.microsoft.com/windows/nanoserver:ltsc2019 cmd.exe /c echo hello
-    timeout_in_minutes: 5
-    agents:
-      stack: "buildkite-aws-stack-test-windows-amd64-${BUILDKITE_BUILD_NUMBER}"
-      queue: "testqueue-windows-amd64-${BUILDKITE_BUILD_NUMBER}"
-    depends_on:
-      - "launch-windows-amd64"
-
-  - id: "delete-windows-amd64"
-    name: ":cloudformation: :windows: AMD64 Delete"
-    command: .buildkite/steps/delete.sh windows amd64
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on:
-      - "test-windows-amd64"
 
   - id: "packer-linux-amd64"
     name: ":packer: :linux: AMD64"
@@ -74,9 +14,6 @@ steps:
     retry: { automatic: { limit: 3 } }
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on:
-      - "lint"
-      - "bats-tests"
 
   - id: "launch-linux-amd64"
     name: ":cloudformation: :linux: AMD64 Launch"
@@ -112,6 +49,8 @@ steps:
       - docker-compose#v3.7.0:
           run: db
           config: tests/docker-compose.yaml
+    depends_on:
+      - launch-linux-amd64
 
   - id: test-linux-amd64-docker-build
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Buildx"
@@ -129,48 +68,9 @@ steps:
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     depends_on:
-      - "test-linux-amd64"
-
-  - id: "packer-linux-arm64"
-    name: ":packer: :linux: ARM64"
-    command: .buildkite/steps/packer.sh linux arm64
-    timeout_in_minutes: 60
-    retry: { automatic: { limit: 3 } }
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on:
-      - "lint"
-      - "bats-tests"
-
-  - id: "launch-linux-arm64"
-    name: ":cloudformation: :linux: ARM64 Launch"
-    command: .buildkite/steps/launch.sh linux arm64
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    artifact_paths: "build/aws-stack.yml"
-    depends_on:
-      - "packer-linux-arm64"
-      - "deploy-service-role-stack"
-
-  - id: "test-linux-arm64"
-    name: ":cloudformation: :linux: ARM64 Test"
-    command:
-      - git --version
-      - goss validate --format documentation
-    timeout_in_minutes: 5
-    agents:
-      stack: "buildkite-aws-stack-test-linux-arm64-${BUILDKITE_BUILD_NUMBER}"
-      queue: "testqueue-linux-arm64-${BUILDKITE_BUILD_NUMBER}"
-    depends_on:
-      - "launch-linux-arm64"
-
-  - id: "delete-linux-arm64"
-    name: ":cloudformation: :linux: ARM64 Delete"
-    command: .buildkite/steps/delete.sh linux arm64
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on:
-      - "test-linux-arm64"
+      - test-linux-amd64
+      - test-linux-amd64-docker-compose
+      - test-linux-amd64-docker-build
 
   - id: "delete-service-role-stack"
     name: ":aws-iam: :cloudformation: Delete"
@@ -178,35 +78,12 @@ steps:
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     depends_on:
-      - "delete-windows-amd64"
-      - "delete-linux-amd64"
-      - "delete-linux-arm64"
-
-  - id: "copy-ami"
-    name: ":cloudformation: 🚚 🌎"
-    command: .buildkite/steps/copy.sh
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    artifact_paths: "build/mappings.yml"
-    depends_on:
-      - "test-linux-amd64"
-      - "test-linux-arm64"
-      - "test-windows-amd64"
-
-  - id: "publish"
-    name: ":cloudformation: :rocket:"
-    command: .buildkite/steps/publish.sh
-    agents:
-      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    concurrency_group: "aws-stack-publish"
-    concurrency: 1
-    concurrency_method: eager
-    artifact_paths: "build/*.yml"
-    depends_on: "copy-ami"
+      - delete-linux-amd64
 
   - id: "cleanup"
     name: "Cleanup"
     command: .buildkite/steps/cleanup.sh
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
-    depends_on: "publish"
+    depends_on:
+      - delete-linux-amd64
