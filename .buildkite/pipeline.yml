@@ -47,7 +47,7 @@ steps:
       BUILDKIT_PROGRESS: plain
     plugins:
       - docker-compose#v3.7.0:
-          run: db
+          run: app_with_deps
           config: tests/docker-compose.yaml
     depends_on:
       - launch-linux-amd64
@@ -55,7 +55,7 @@ steps:
   - id: test-linux-amd64-docker-build
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Buildx"
     timeout_in_minutes: 5
-    command: docker buildx build -f tests/Dockerfile --progress=plain -t buildkite-postgres:latest tests
+    command: docker buildx build -f tests/Dockerfile.postgres --progress=plain -t buildkite-postgres:latest tests
     agents:
       stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
       queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
