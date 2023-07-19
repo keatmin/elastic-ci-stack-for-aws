@@ -1,32 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DOCKER_VERSION=24.0.4
+DOCKER_RELEASE=stable
 DOCKER_COMPOSE_V2_VERSION=2.20.0
 DOCKER_BUILDX_VERSION=0.11.1
 MACHINE=$(uname -m)
 
 echo Installing docker...
-sudo dnf install -yq docker
-sudo systemctl enable --now docker
+sudo dnf install -yq \
+  cni-plugins \
+  iptables-nft \
+  xz
 
-echo Add ec2-user to docker group.
-sudo usermod -a -G docker ec2-user
+# Manual install ala https://docs.docker.com/engine/installation/binaries/
+curl -Lsf -o docker.tgz "https://download.docker.com/linux/static/${DOCKER_RELEASE}/${MACHINE}/docker-${DOCKER_VERSION}.tgz"
+tar -xvzf docker.tgz
+sudo mv docker/* /usr/bin
+rm -r docker.tgz docker
 
 echo Add docker config
 sudo mkdir -p /etc/docker
 sudo cp /tmp/conf/docker/daemon.json /etc/docker/daemon.json
 
-echo "Adding docker systemd timers..."
+# Add docker group
+sudo groupadd -r docker
+sudo usermod -aG docker ec2-user
+
+CONTAINERD_VERSION=$(containerd --version | awk '{print $3}')
+
+echo Installing systemd services...
+sudo curl -Lfs \
+  -o /etc/systemd/system/docker.service \
+  "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.service"
+sudo curl -Lfs \
+  -o /etc/systemd/system/docker.socket \
+  "https://raw.githubusercontent.com/moby/moby/v${DOCKER_VERSION}/contrib/init/systemd/docker.socket"
+sudo curl -Lfs \
+  -o /etc/systemd/system/containerd.service \
+  "https://raw.githubusercontent.com/containerd/containerd/${CONTAINERD_VERSION}/containerd.service"
+sudo sed -i 's,/sbin,/usr/bin,;s,/usr/local,/usr,' /etc/systemd/system/containerd.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now containerd docker
+
+echo Adding docker systemd timers...
 sudo cp /tmp/conf/docker/scripts/* /usr/local/bin
 sudo cp /tmp/conf/docker/systemd/docker-* /etc/systemd/system
 sudo chmod +x /usr/local/bin/docker-*
 sudo systemctl daemon-reload
 sudo systemctl enable docker-gc.timer docker-low-disk-gc.timer
 
-echo "Installing docker buildx..."
+echo Installing docker buildx...
 DOCKER_CLI_DIR=/usr/libexec/docker/cli-plugins
 sudo mkdir -p "${DOCKER_CLI_DIR}"
 
+echo Installing docker compose...
 DOCKER_COMPOSE_V2_ARCH="${MACHINE}"
 case "${MACHINE}" in
   x86_64) BUILDX_ARCH="amd64";;
