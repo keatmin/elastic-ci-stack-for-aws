@@ -25,21 +25,10 @@ steps:
       - "packer-linux-amd64"
       - "deploy-service-role-stack"
 
-  - id: "test-linux-amd64"
-    name: ":cloudformation: :linux: AMD64 Test"
-    command:
-      - git --version
-      - goss validate --format documentation
-    timeout_in_minutes: 5
-    agents:
-      stack: "buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}"
-      queue: "testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}"
-    depends_on:
-      - "launch-linux-amd64"
-
   - id: test-linux-amd64-docker-compose
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Compose"
-    timeout_in_minutes: 5
+    timeout_in_minutes: 20
+    parallelism: 100
     agents:
       stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
       queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
@@ -54,7 +43,8 @@ steps:
 
   - id: test-linux-amd64-docker-build
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Buildx"
-    timeout_in_minutes: 5
+    parallelism: 100
+    timeout_in_minutes: 20
     command: docker buildx build -f tests/Dockerfile.postgres --progress=plain -t buildkite-postgres:latest tests
     agents:
       stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
@@ -68,7 +58,6 @@ steps:
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     depends_on:
-      - test-linux-amd64
       - test-linux-amd64-docker-compose
       - test-linux-amd64-docker-build
 

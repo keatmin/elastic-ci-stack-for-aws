@@ -70,7 +70,7 @@ cat << EOF > config.json
   },
   {
     "ParameterKey": "MaxSize",
-    "ParameterValue": "10"
+    "ParameterValue": "200"
   },
   {
     "ParameterKey": "AgentsPerInstance",
