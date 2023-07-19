@@ -28,7 +28,7 @@ steps:
   - id: test-linux-amd64-docker-compose
     name: ":cloudformation: :linux::docker: AMD64 Test Docker Compose"
     timeout_in_minutes: 20
-    parallelism: 100
+    parallelism: 200
     agents:
       stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
       queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
@@ -41,17 +41,6 @@ steps:
     depends_on:
       - launch-linux-amd64
 
-  - id: test-linux-amd64-docker-build
-    name: ":cloudformation: :linux::docker: AMD64 Test Docker Buildx"
-    parallelism: 100
-    timeout_in_minutes: 20
-    command: docker buildx build -f tests/Dockerfile.postgres --progress=plain -t buildkite-postgres:latest tests
-    agents:
-      stack: buildkite-aws-stack-test-linux-amd64-${BUILDKITE_BUILD_NUMBER}
-      queue: testqueue-linux-amd64-${BUILDKITE_BUILD_NUMBER}
-    depends_on:
-      - launch-linux-amd64
-
   - id: "delete-linux-amd64"
     name: ":cloudformation: :linux: AMD64 Delete"
     command: .buildkite/steps/delete.sh linux amd64
@@ -59,7 +48,6 @@ steps:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     depends_on:
       - test-linux-amd64-docker-compose
-      - test-linux-amd64-docker-build
 
   - id: "delete-service-role-stack"
     name: ":aws-iam: :cloudformation: Delete"
