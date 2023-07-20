@@ -1,4 +1,3 @@
 {
-  "exec-opts": ["native.cgroupdriver=cgroupfs"],
-  "storage-driver": "overlay2"
+  "storage-driver": "fuse-overlayfs"
 }

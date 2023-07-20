@@ -5,11 +5,13 @@ DOCKER_VERSION=24.0.4
 DOCKER_RELEASE=stable
 DOCKER_COMPOSE_V2_VERSION=2.20.2
 DOCKER_BUILDX_VERSION=0.11.2
+FUSE_OVERLAYFS_VERSION=1.12
 MACHINE=$(uname -m)
 
 echo Installing docker...
 sudo dnf install -yq \
   cni-plugins \
+  fuse3 \
   iptables-nft \
   xz
 
@@ -26,6 +28,12 @@ sudo groupadd -r docker
 sudo usermod -aG docker ec2-user
 
 CONTAINERD_VERSION=$(containerd --version | awk '{print $3}')
+
+echo Installing fuse-overlayfs...
+sudo curl -Lfs \
+  -o /usr/bin/fuse-overlayfs \
+  "https://github.com/containers/fuse-overlayfs/releases/download/v{$FUSE_OVERLAYFS_VERSION}/fuse-overlayfs-x86_64"
+sudo chmod +x /usr/bin/fuse-overlayfs
 
 echo Installing systemd services...
 sudo curl -Lfs \
