@@ -45,6 +45,7 @@ steps:
   - id: "delete-linux-amd64"
     name: ":cloudformation: :linux: AMD64 Delete"
     command: .buildkite/steps/delete.sh linux amd64
+    allow_dependency_failure: true
     agents:
       queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
     depends_on:
