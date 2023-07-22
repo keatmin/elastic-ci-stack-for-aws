@@ -37,7 +37,6 @@ steps:
     plugins:
       - docker-compose#v4.14.0:
           run: app_with_deps
-          cli_version: 2
           config: tests/docker-compose.yaml
     depends_on:
       - launch-linux-amd64
